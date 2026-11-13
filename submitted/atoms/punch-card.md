@@ -16,7 +16,7 @@ toc: true
 
 ## Summary
 
-Punch Card is a shop's punch card: a punch card collects one stamp per purchase, and a punch card that has reached its goal, ten stamps where the shop sets no other number, is traded for one free item. Whoever holds the punch card's code collects the stamps and claims the free item, so the code is drawn at random where nobody can guess it, and the shop's own records name the punch card by a separate card id that claims nothing. A stamp adds exactly one, and a full punch card takes no more stamps until its free item is claimed. Claiming the free item empties the punch card, so the same punch card starts on the next ten, and the punch card counts every free item it has given. What counts as a purchase, which item is free, who at the shop may stamp, and extras such as double-stamp days or expiry each belong to another pattern, which is why one punch card serves a thrift store, a café and a car wash alike.
+Punch Card is a shop's punch card: a punch card collects one stamp per purchase, and a punch card that has reached its goal, five stamps where the shop sets no other number, is traded for one free item. Whoever holds the punch card's code collects the stamps and claims the free item, so the code is drawn at random where nobody can guess it, and the shop's own records name the punch card by a separate card id that claims nothing. A stamp adds exactly one, and a full punch card takes no more stamps until its free item is claimed. Claiming the free item empties the punch card, so the same punch card starts on the next five, and the punch card counts every free item it has given. What counts as a purchase, which item is free, who at the shop may stamp, and extras such as double-stamp days or expiry each belong to another pattern, which is why one punch card serves a thrift store, a café and a car wash alike.
 
 ---
 
@@ -91,7 +91,7 @@ NOTE: the atom declares no reference, so Execution Contract Logic confinement 13
 
 NOTE: watch the id the host supplies to two calls (Capability requirement 8, Capability requirement 9).
 
-Term stamp goal: the number of stamps the deployment asks for one free item — a [Stamp Goal]; a positive count; ten where a deployment declares none.
+Term stamp goal: the number of stamps the deployment asks for one free item — a [Stamp Goal]; a positive count; five where a deployment declares none.
 
 NOTE: watch the unset setting (Capability requirement 5).
 
@@ -186,7 +186,7 @@ The same pattern in two domains, then the rejection paths.
 
 ### Thrift store
 
-A thrift store that declares no stamp goal hands a shopper a punch card: `issue()` answers `issued(p1, "7KQ9M2XV4RTP8HNC")`, and the punch card's goal is ten. Each purchase earns a stamp: the first `stamp("7KQ9M2XV4RTP8HNC")` answers 1, and the tenth answers 10. The shopper checks the punch card — `check_stamps("7KQ9M2XV4RTP8HNC")` answers 10 stamps of a goal of 10 — picks a free item, and the till redeems: `redeem("7KQ9M2XV4RTP8HNC")` answers 1, the punch card's first redemption. The punch card is empty again, and the next purchase's stamp answers 1. The store's back office reads the punch card by its id — `read(p1)` answers a goal of 10, 1 stamp and 1 redemption, and no code.
+A thrift store that declares no stamp goal hands a shopper a punch card: `issue()` answers `issued(p1, "7KQ9M2XV4RTP8HNC")`, and the punch card's goal is five. Each purchase earns a stamp: the first `stamp("7KQ9M2XV4RTP8HNC")` answers 1, and the fifth answers 5. The shopper checks the punch card — `check_stamps("7KQ9M2XV4RTP8HNC")` answers 5 stamps of a goal of 5 — picks a free item, and the till redeems: `redeem("7KQ9M2XV4RTP8HNC")` answers 1, the punch card's first redemption. The punch card is empty again, and the next purchase's stamp answers 1. The store's back office reads the punch card by its id — `read(p1)` answers a goal of 5, 1 stamp and 1 redemption, and no code.
 
 ### Café
 
@@ -194,10 +194,10 @@ A café declares a stamp goal of 6. `issue()` answers `issued(c3, "Q4WN8ZT2HC6PL
 
 ### Rejection paths
 
-The thrift store above, with punch card `p1` holding 10 stamps of a goal of 10, and punch card `p2`, code `"M3RX8TQ2WN6PLHC4"`, holding 4:
+The thrift store above, with punch card `p1` holding 5 stamps of a goal of 5, and punch card `p2`, code `"M3RX8TQ2WN6PLHC4"`, holding 3:
 
-- `stamp("7KQ9M2XV4RTP8HNC")` — rejected as [Full]; the stamps stay 10 (Invariant 3.1), and the till redeems the punch card, then stamps it.
-- `redeem("M3RX8TQ2WN6PLHC4")` — rejected as [Not Full]; the stamps stay 4 (Invariant 3.2).
+- `stamp("7KQ9M2XV4RTP8HNC")` — rejected as [Full]; the stamps stay 5 (Invariant 3.1), and the till redeems the punch card, then stamps it.
+- `redeem("M3RX8TQ2WN6PLHC4")` — rejected as [Not Full]; the stamps stay 3 (Invariant 3.2).
 - `stamp("7kq9m2xv4rtp8hnc")` — rejected as [Not Known]: two codes are compared codepoint for codepoint, and neither the atom nor the deployment normalizes one (Identity 8, Identity 9, Capability requirement 7).
 - `check_stamps("NOSUCHCODE000000")` — rejected as [Not Known].
 - `read(p404)`, where no punch card `p404` exists — rejected as [Not Known].
@@ -372,7 +372,7 @@ Projection: redemptions
 
 #### Stamp Goal
 
-The number of stamps the deployment asks for one free item; ten where a deployment declares none. A change reaches the punch cards issued from then on.
+The number of stamps the deployment asks for one free item; five where a deployment declares none. A change reaches the punch cards issued from then on.
 
 Kind:       Parameter
 Parameter of: Issue
@@ -470,6 +470,6 @@ open: none
 
 ## Decisions
 
-- **2026-11-13 — Drafted through the Grace connector mirroring Gift Card, for GitHub user scottromack.** *Chose:* a punch card that collects one stamp per purchase toward a goal of ten and is redeemed at the goal for one free item (the submitter, 2026-11-12: "one stamp per purchase, ten for a free item"); the goal the deployment's, ten where none is declared, copied onto the punch card at issue (Capability requirement 5, Operation 2, Invariant 2.2); a redeem that empties the punch card and counts the redemption, so one punch card serves a customer for good (Operation 13, Operation 14); a card id for the shop's records beside a random card code its holder presents (Identity 1 through 5, Operation 18). *Over:* a punch card used up at its first redemption (a stored used-up state and a new punch card per free item, where the stamps at zero already say empty); a stamp on a full punch card rolling into the next ten (one call would mean two things, and a free item could go unclaimed); a goal read from the deployment on every call (a changed setting would move a customer's finish line). *Because:* the EOS test keeps one freestanding concept, a count raised to a goal and traded, and names an owner for everything a shop layers on it (Non-goal 1 through 13); as simple as possible without losing fidelity keeps three stored numbers and no status.
+- **2026-11-13 — Drafted through the Grace connector mirroring Gift Card, for GitHub user scottromack.** *Chose:* a punch card that collects one stamp per purchase toward a goal of five and is redeemed at the goal for one free item (the submitter, 2026-11-12: "one stamp per purchase, ten for a free item"); the goal the deployment's, five where none is declared, copied onto the punch card at issue (Capability requirement 5, Operation 2, Invariant 2.2); a redeem that empties the punch card and counts the redemption, so one punch card serves a customer for good (Operation 13, Operation 14); a card id for the shop's records beside a random card code its holder presents (Identity 1 through 5, Operation 18). *Over:* a punch card used up at its first redemption (a stored used-up state and a new punch card per free item, where the stamps at zero already say empty); a stamp on a full punch card rolling into the next five (one call would mean two things, and a free item could go unclaimed); a goal read from the deployment on every call (a changed setting would move a customer's finish line). *Because:* the EOS test keeps one freestanding concept, a count raised to a goal and traded, and names an owner for everything a shop layers on it (Non-goal 1 through 13); as simple as possible without losing fidelity keeps three stored numbers and no status.
 
 NOTE: End of Punch Card.
