@@ -131,7 +131,7 @@ Operation 17: IF the share count EXCEEDS the part cap THEN [Split] MUST answer t
 Operation 18: IF the share count EQUALS zero THEN [Split] MUST answer invalid-shares.
 Operation 19: IF a share IS NOT IN the capped counts THEN [Split] MUST answer invalid-shares.
 Operation 20: [Split] MUST answer EXACTLY ONE part PER share, in the order of the shares.
-Operation 21: A first part MUST carry (the part's base share + the step) as amount PER Execution Contract Logic confinement 9.
+Operation 21: A first part MUST carry the part's stepped share as amount PER Execution Contract Logic confinement 9.
 Operation 22: A part outside the first parts MUST carry the part's base share as amount.
 Operation 23: An action MUST NOT write.
 ```
@@ -207,6 +207,8 @@ Term leftover: the money's size less the base sizes of the parts, added up — h
 Term first parts: as many short parts as the leftover counts, taken from the front of the order of the shares; one of the first parts is a first part.
 
 Term step: one minor unit in the direction of the money's amount — 1 for a money above zero, -1 for a money below zero.
+
+Term stepped share: the part's base share plus the step — the base share moved one minor unit away from zero.
 
 Term total: the amounts of the parts of one [Split] answer, added up.
 
@@ -320,7 +322,7 @@ The conformance table, each row a call and the answer the atom owes, under the d
 | `compare(money("USD", -500), money("USD", 100))` | less | Operation 8 |
 | `compare(money("USD", 100), money("USD", 100))` | equal | Operation 9 |
 | `negate(money("USD", 2249))` | `money("USD", -2249)` | Operation 11 |
-| `negate(money("USD", 0))` | `money("USD", 0)` | Term negation |
+| `negate(money("USD", 0))` | `money("USD", 0)` | Operation 11 |
 | `multiply(money("USD", 2249), 825, 10000, down)` | `money("USD", 185)` | Term down |
 | `multiply(money("USD", 2249), 825, 10000, up)` | `money("USD", 186)` | Term up |
 | `multiply(money("USD", 2249), 825, 10000, half-up)` | `money("USD", 186)` | Term half-up |
@@ -356,17 +358,17 @@ Term conformance table: the table above, each row a call and the answer the atom
 ### Conformance checks
 
 ```
-Check 1.1: An auditor MUST find, for EVERY row of the conformance table, the row's answer on the row's call (Operation 1 through 22).
-Check 2.1: An auditor MUST find EVERY result carrying the money's currency (Invariant 1.1).
-Check 2.2: An auditor MUST find EVERY part carrying the money's currency (Invariant 1.2).
-Check 3.1: An auditor MUST find no [Split] answer whose total DOES NOT EQUAL the money's amount (Invariant 2.1).
-Check 3.2: An auditor MUST find no part whose gap's size EXCEEDS the share total (Invariant 3.1).
-Check 3.3: An auditor MUST find no part whose gap's size EQUALS the share total (Invariant 3.1).
-Check 3.4: An auditor MUST find no [Split] call whose leftover EXCEEDS the short count (Invariant 4.1).
-Check 4.1: An auditor MUST find EVERY round trip answering the money (Invariant 5.1).
-Check 5.1: An auditor MUST find EVERY negated [Multiply] call answering the negation of the result (Invariant 6.1).
-Check 5.2: An auditor MUST find EVERY negated [Split] call answering the negation of EVERY part (Invariant 6.2).
-Check 6.1: An auditor MUST find no result whose size EXCEEDS the number cap (Invariant 7.1).
+Check 1.1: An auditor MUST find EVERY result carrying the money's currency (Invariant 1.1).
+Check 1.2: An auditor MUST find EVERY part carrying the money's currency (Invariant 1.2).
+Check 2.1: An auditor MUST find no [Split] answer whose total DOES NOT EQUAL the money's amount (Invariant 2.1).
+Check 3.1: An auditor MUST find no part whose gap's size EXCEEDS the share total (Invariant 3.1).
+Check 3.2: An auditor MUST find no part whose gap's size EQUALS the share total (Invariant 3.1).
+Check 4.1: An auditor MUST find no [Split] call whose leftover EXCEEDS the short count (Invariant 4.1).
+Check 5.1: An auditor MUST find EVERY round trip answering the money (Invariant 5.1).
+Check 6.1: An auditor MUST find EVERY negated [Multiply] call answering the negation of the result (Invariant 6.1).
+Check 6.2: An auditor MUST find EVERY negated [Split] call answering the negation of EVERY part (Invariant 6.2).
+Check 7.1: An auditor MUST find no result whose size EXCEEDS the number cap (Invariant 7.1).
+Check 8.1: An auditor MUST find, for EVERY row of the conformance table, the row's answer on the row's call (Operation 1 through 22).
 ```
 
 NOTE: EVERY check names the rule the check tests.
@@ -429,7 +431,7 @@ Term cadences: empty.
 
 Term qualifiers: migrated — drafted in GRACE lang v0.69 (2026-11-13) through the Grace connector.
 
-Term terms: money, currency, amount, minor unit, whole number, positive count, size, negation, number cap, part cap, capped number, capped count, action, pair action, well-formed money, other money, result, sum, difference, order, rate, numerator, denominator, product, quotient, remainder, rounding, roundings, down, up, half-up, half-even, rounded size, rounded product, shares, share count, share total, part, parts, share product, base size, part remainder, short part, short count, base share, leftover, first parts, step, total, gap, round trip, negated call, conformance table.
+Term terms: money, currency, amount, minor unit, whole number, positive count, size, negation, number cap, part cap, capped number, capped count, action, pair action, well-formed money, other money, result, sum, difference, order, rate, numerator, denominator, product, quotient, remainder, rounding, roundings, down, up, half-up, half-even, rounded size, rounded product, shares, share count, share total, part, parts, share product, base size, part remainder, short part, short count, base share, leftover, first parts, step, stepped share, total, gap, round trip, negated call, conformance table.
 
 #### Add
 
